@@ -64,22 +64,22 @@ def url_response():
     url_address = request.args.get('val')
   
     # state_tab(data_frame_list[0]) 
-    table_count = url_scrapping(url_address)    # dispplay table count  
- 
+    table_count = url_scrapping(url_address)    # dispplay table count
 
     return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, strip_searchlist=strip_search_list, 
-    tb_count = table_count)
+    tb_count = df_result_table)
 
 #================ click side bar of table list =======================
 @app.route("/table")
 def table_response(): 
     
-    table_num = int(request.args.get('val')) 
+    table_num = int(request.args.get('val'))
+     
 
     state_tab(data_frame_list[table_num])   
 
     return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, strip_searchlist=strip_search_list, 
-    tb_count = table_count, state_tables=df_state_result)
+    tb_count = df_result_table, state_tables=df_state_result)
 
 #================ click side bar of table list =======================
 
@@ -163,19 +163,19 @@ def state_tab(data_frame):
                         data = ""
                         prefix = val[0].replace("p","")
                         if(prefix == ""):
-                            data = "[prefix:empty]"
+                            data = "[prefix : empty]"
                         else:
-                            data = "[Prefix:"+prefix+"]"
+                            data = "[Prefix : "+prefix+"]"
 
                         surfix = val[2].replace("p", "")
                         number = val[1]                                   
 
-                        data = data + "[type:" + type_data(number)+"]"
+                        data = data + "[type : " + type_data(number)+"]"
 
                         if(surfix == ""):
-                            data = data + "[surfix:empty"+"]"
+                            data = data + "[surfix : empty"+"]"
                         else:
-                            data = data +"[surfix:"+ surfix+"]"
+                            data = data +"[surfix : "+ surfix+"]"
 
                         if(type_data(number) == "int"):
                             number_list.append(int(number))
@@ -183,9 +183,9 @@ def state_tab(data_frame):
                             number_list.append(float(number))
 
                         if i == (len(num_df)-1):
-                            data =  data + "[max:" +str(max(number_list))+"]"
-                            data =  data + "[min:" + str(min(number_list))+"]"
-                            data =  data + "[av:" + str(max(number_list)/len(number))+"]"
+                            data =  data + "[max : " +str(max(number_list))+"]"
+                            data =  data + "[min : " + str(min(number_list))+"]"
+                            data =  data + "[av : " + str(max(number_list)/len(number))+"]"
                         
                     else:
                         print(data)
