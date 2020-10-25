@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup
 import time
 import pandas as pd
 from dateutil.parser import parse
+from itertools import groupby
+import re
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -19,19 +21,22 @@ strip_search_list = []
 search_list = []
 table_count = []
 df_result_table = []
-df_state_result = []
+df_state_result = ""
 data_frame_list = []
 
 @app.route('/')
 def index():
     return render_template("index.html")
 
-
-
 #=========== search keyword =================
 @app.route("/",methods=['GET', 'POST'])
 def search_result():    
     global  strip_search_list, search_list
+    search_list.clear()
+    search_list = []
+
+    strip_search_list.clear()
+    strip_search_list = []
     if request.method == "POST":
         try:
             url = request.form['search']
@@ -121,11 +126,7 @@ def url_scrapping(string):
     return tb_list
 #================ tab state  ==================
 def state_tab(data_frame):
-    global df_state_result
-    #df_state_result.clear()
-    df_state_result = []
-
-    df_state_result  = []
+    global df_state_result   
     
     header = []
 
@@ -141,29 +142,98 @@ def state_tab(data_frame):
                 state_value.append(data)
                 #print(data)
         else:
-            data_frame[row] = data_frame[row].astype(str).str.replace(',','').replace('n/a','')
-            try:
-                int_data = [int_data for int_data in data_frame[row] if int_data.isdigit()]
-                data_frame[row] = pd.to_numeric(data_frame[row])
-                if(len(int_data) == len(data_frame[row])):
-                    data = "int"
+            data_frame[row] = data_frame[row].astype(str).str.replace(',','').replace('n/a','')          
+            
+            
+            num_df = []
+            for i in range(0,len(data_frame[row])):
+                if(data_frame[row][i] != '0' or data_frame[row][i] != 'n/a'):
+                    num_df.append(data_frame[row][i])
+
+            print(num_df)
+
+            number_list = []
+            
+            for i in range(0,len(num_df)):
+                if(type_data(num_df[0]) == type_data(num_df[i])):
+                    data = type_data(num_df[0])
+                    if(data == "s_char"):
+                        String = "p" + num_df[i] + "p"
+                        val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
+                        data = ""
+                        prefix = val[0].replace("p","")
+                        if(prefix == ""):
+                            data = "[prefix:empty]"
+                        else:
+                            data = "[Prefix:"+prefix+"]"
+
+                        surfix = val[2].replace("p", "")
+                        number = val[1]                                   
+
+                        data = data + "[type:" + type_data(number)+"]"
+
+                        if(surfix == ""):
+                            data = data + "[surfix:empty"+"]"
+                        else:
+                            data = data +"[surfix:"+ surfix+"]"
+
+                        if(type_data(number) == "int"):
+                            number_list.append(int(number))
+                        elif (type_data(number) == "float" or type_data(number) == "floating_with_2_decimal_places"):
+                            number_list.append(float(number))
+
+                        if i == (len(num_df)-1):
+                            data =  data + "[max:" +str(max(number_list))+"]"
+                            data =  data + "[min:" + str(min(number_list))+"]"
+                            data =  data + "[av:" + str(max(number_list)/len(number))+"]"
+                        
+                    else:
+                        print(data)
+                        print("**********************")
                 else:
-                    data = "float"
-                state_value.append(data)
-            except ValueError:
-                date_frame = [ date_frame for date_frame in data_frame[row] if is_date(date_frame) is True]
-                if("$" in data_frame[row]):
-                    data = "contains$"
-                elif  len(data_frame[row]) == len(date_frame):
-                    data = "date"
-                else:
-                    data = "char"
-                state_value.append(data)
-                #print(state_value)
+                    data = "mix"
+                    #break
+                             
+                    
+            state_value.append(data)
     df_state=df_state.append(pd.Series(state_value,index=header),ignore_index=True)
     #print(df_state)
     df_state_result = df_state.to_html(classes='data')
-    print(df_state_result)
+#================= get type of string data ================================
+def type_data(string):
+    try:
+        int_val = int(string)
+        #print("int")
+        data = "int"
+        return data
+    except ValueError:
+        try:
+            float_val = float(string)
+            if(len(string.split(".")[1]) == 2):
+                #print("floating_with_2_decimal_places")
+                data = "floating_with_2_decimal_places"
+                return data
+            else:
+                #print("float")
+                data = "float"
+                return data
+        except ValueError:
+            if is_date(string)== True:
+                #print("date")
+                data = "date"
+                return data
+            else:
+                String = "p" + string + "p"
+                #print(String)
+                val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
+                print(val)
+                if len(val) == 1:
+                    #print("char")
+                    data = "char"
+                    return data
+                else:
+                    data = "s_char"
+                    return data   
 
 def is_date(string, fuzzy=False):
     """
