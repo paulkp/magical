@@ -13,6 +13,7 @@ import pandas as pd
 from dateutil.parser import parse
 from itertools import groupby
 import re
+import string
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -62,19 +63,22 @@ def url_response():
     table_count.clear()
     table_count = []   
     url_address = request.args.get('val')
-  
-    # state_tab(data_frame_list[0]) 
     table_count = url_scrapping(url_address)    # dispplay table count
+    state_tab(data_frame_list[0])  
 
-    return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, strip_searchlist=strip_search_list, 
-    tb_count = df_result_table)
+    if len(table_count) != 0:
+        return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, strip_searchlist=strip_search_list, 
+        tb_count = df_result_table , state_tables=df_state_result)
+    else:
+        return render_template('index.html',searchlist=search_list, strip_searchlist=strip_search_list, 
+        tb_count = df_result_table , state_tables=df_state_result )
+
 
 #================ click side bar of table list =======================
 @app.route("/table")
 def table_response(): 
     
-    table_num = int(request.args.get('val'))
-     
+    table_num = int(request.args.get('val'))     
 
     state_tab(data_frame_list[table_num])   
 
@@ -121,7 +125,7 @@ def url_scrapping(string):
             data_frame_list.append(df)    
 
         except:
-            print("")  
+            print("dont'find")  
 
     return tb_list
 #================ tab state  ==================
@@ -132,25 +136,26 @@ def state_tab(data_frame):
 
     for row in data_frame.columns:
         header.append(row)
-    df_state = pd.DataFrame(columns=header)
-
+    try:
+        df_state = pd.DataFrame(columns=header)
+    except AttributeError:
+        df_state = pd.DataFrame(columns=[header])
     state_value = []
     for row in data_frame.columns:
 
         if data_frame[row].empty == True:
                 data = "empty"
-                state_value.append(data)
-                #print(data)
+                state_value.append(data)                
         else:
-            data_frame[row] = data_frame[row].astype(str).str.replace(',','').replace('n/a','')          
-            
+            try:
+                data_frame[row] = data_frame[row].astype(str).str.replace(',','').replace('n/a','').replace('.N.A','')          
+            except AttributeError:
+                data_frame[row] = data_frame[row].str.replace(',','').replace('n/a','').replace('.N.A','')          
             
             num_df = []
             for i in range(0,len(data_frame[row])):
                 if(data_frame[row][i] != '0' or data_frame[row][i] != 'n/a'):
-                    num_df.append(data_frame[row][i])
-
-            print(num_df)
+                    num_df.append(data_frame[row][i])         
 
             number_list = []
             
@@ -188,8 +193,7 @@ def state_tab(data_frame):
                             data =  data + "[av : " + str(max(number_list)/len(number))+"]"
                         
                     else:
-                        print(data)
-                        print("**********************")
+                        print("don't find data")
                 else:
                     data = "mix"
                     #break
@@ -197,38 +201,32 @@ def state_tab(data_frame):
                     
             state_value.append(data)
     df_state=df_state.append(pd.Series(state_value,index=header),ignore_index=True)
-    #print(df_state)
+    
     df_state_result = df_state.to_html(classes='data')
 #================= get type of string data ================================
 def type_data(string):
     try:
         int_val = int(string)
-        #print("int")
         data = "int"
         return data
     except ValueError:
         try:
             float_val = float(string)
             if(len(string.split(".")[1]) == 2):
-                #print("floating_with_2_decimal_places")
                 data = "floating_with_2_decimal_places"
                 return data
             else:
-                #print("float")
                 data = "float"
                 return data
         except ValueError:
             if is_date(string)== True:
-                #print("date")
                 data = "date"
                 return data
             else:
                 String = "p" + string + "p"
-                #print(String)
                 val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
                 print(val)
                 if len(val) == 1:
-                    #print("char")
                     data = "char"
                     return data
                 else:
