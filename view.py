@@ -154,11 +154,11 @@ def state_tab(data_frame):
             
             num_df = []
             for i in range(0,len(data_frame[row])):
-                if(data_frame[row][i] != '0' or data_frame[row][i] != 'n/a'):
+                if(data_frame[row][i] != '0' or data_frame[row][i] != 'n/a'or data_frame[row][i] != '' or data_frame[row][i] != 'N/A'or data_frame[row][i] != '.N.A'):
                     num_df.append(data_frame[row][i])         
 
             number_list = []
-            
+            print(type_data(num_df[i]))
             for i in range(0,len(num_df)):
                 if(type_data(num_df[0]) == type_data(num_df[i])):
                     data = type_data(num_df[0])
