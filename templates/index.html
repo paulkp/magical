@@ -6,6 +6,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../static/style.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -13,27 +14,13 @@
 
     <body>
         <br>
-
-        <div class="container">
-            <h2>Simple Web Search</h2>
-            <br>
-            <!-- Nav tabs -->
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item col-sm-4 p-0" style="width:50%">
-                    <a class="nav-link active" data-toggle="tab" href="#command"><b>Command</b></a>
-                </li>
-                <li class="nav-item col-sm-4 p-0" style="width:50%">
-                    <a class="nav-link" data-toggle="tab" href="#log"><b>Log</b></a>
-                </li>
-                <li class="nav-item col-sm-4 p-0" style="width:50%">
-                    <a class="nav-link" data-toggle="tab" href="#state"><b>Stats</b></a>
-                </li>
-            </ul>
-
-            <!-- Tab panes -->
-            <div class="tab-content">
-                <!-- Command tab -->
-                <div id="command" class="container tab-pane active"><br>
+        <div class="container" style="max-width: 1500px;">
+        <!--    search input  -->
+            <div class="row">
+                <div class="col-md-3">
+                    <h2>Pretzel Al Lab</h2>
+                </div>
+                <div class="col-md-9">
                     <form action="/" method="post">
                         <div class="input-group mb-3">
                             <input type="text" class="form-control" placeholder="Search" id="search" name="search" required>
@@ -42,42 +29,103 @@
                             </div>
                         </div>
                     </form>
-                    <div class="m-10" style="margin:50px">
-                        {{distint_num}}{{ count }}
-                    </div>
-                    <div class="m-10" style="margin:50px">
-                        {{ table|safe }}
-                    </div>
                 </div>
-                <!-- Log tab -->
-                <div id="log" class="container tab-pane fade"><br>
-                    <div class="m-6" style="margin:10px;">
-                        <h5><span style="color:blue">{{command_title}}</span>{{command}}</h5>
-                        <h5><span style="color:blue">{{url_title}}</span>{{url}}</h5>
-                    </div>
-                    <div class="m-10" style="margin:50px">
-                        {{distint_num}}{{ count }}
-                    </div>
-                    <div class="m-6" style="margin:10px;">
-                        {% for table in tables %}
-                        <div class="m-10" style="margin:50px">
-                            {{ table|safe }}
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <!-- State tab -->                                   
-                <div id="state" class="container tab-pane fade"><br>
-                    <div class="m-6" style="margin:10px;">
-                        {% for table in state_tables %}
-                        <div class="m-10" style="margin:50px">
-                            {{ table|safe }}
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-               
+
             </div>
+            <!--    search content  -->
+            <div class="row" style="margin-top: 70px">
+                 <!-- side tabs -->
+                <div class="search-list-sidebar col-lg-3">
+                   <div id="sidebar-wrapper">
+                       <div class="search-list"><h5 >URLs </h5></div>
+                      <div class="list-group list-group-flush" >
+                           {% for index in range(0,searchlist | length) %}
+                               <div class="search-list-content col-md-12">
+                                    <a href="/search?val={{ searchlist[index] }}" class="list-group-item list-group-item-action bg-light" title="{{ searchlist[index] }} " style="color:blue" >
+                                       {{index}} . {{ strip_searchlist[index] }}
+                                    </a>
+                               </div>
+                           {% endfor %}
+                      </div>
+                    </div>
+                </div>
+                <!-- table bar -->
+                 <div class="table-list-sidebar col-lg-1 ">
+                   <div id="sidebar-wrapper">
+                      <div class="table-list"><h5 >Tables</h5></div>
+                      <div class="list-group list-group-flush">
+                        {% for index in range(0,tb_count | length) %}
+                            <div class="search-list-content col-md-12">
+                                <a href="/table?val={{ index }}" class="list-group-item list-group-item-action bg-light" style="color:blue">
+                                    {{ index }}
+                                </a>
+                            </div>
+                        {% endfor %}
+
+                      </div>
+                    </div>
+                </div>
+                <!-- Nav tabs -->
+                <div class="col-lg-8">
+                     <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item col-sm-4 p-0" style="width:50%">
+                            <a class="nav-link active" data-toggle="tab" href="#command"><b>Tables</b></a>
+                        </li>
+                        <li class="nav-item col-sm-4 p-0" style="width:50%">
+                            <a class="nav-link" data-toggle="tab" href="#log"><b>Log</b></a>
+                        </li>
+                        <li class="nav-item col-sm-4 p-0" style="width:50%">
+                            <a class="nav-link" data-toggle="tab" href="#state"><b>Stats</b></a>
+                        </li>
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <!-- Command tab -->
+                        <div id="command" class="container tab-pane active"><br>
+                            <h5>{{string}}</h5>
+                            <!-- <div class="m-10" style="margin:50px">
+                                {{distint_num}}{{ count }}
+                            </div> -->
+                            <div class="m-10" style="margin:50px">
+                                {{ table|safe }}
+                            </div>
+                        </div>
+                        <!-- Log tab -->
+                        <div id="log" class="container tab-pane fade"><br>
+                            <!-- <div class="m-6" style="margin:10px;">
+                                <h5><span style="color:blue">{{command_title}}</span>{{command}}</h5>
+                                <h5><span style="color:blue">{{url_title}}</span>{{url}}</h5>
+                            </div>  -->
+                            <!--<div class="m-10" style="margin:50px">
+                                {{distint_num}}{{ count }}
+                            </div> -->
+                            <div class="m-6" style="margin:10px;">
+                                {% for table in tables %}
+                                <div class="m-10" style="margin:50px">
+                                    {{ table|safe }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <!-- State tab -->
+                        <div id="state" class="container tab-pane fade"><br>
+                            <div class="m-6" style="margin:10px;">                               
+                                <div class="m-10" style="margin:50px">
+                                    {{ state_tables|safe }}
+                                </div>                               
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--  display tooltip of sidebar  -->
+        <script>
+            $(document).ready(function(){
+              $('[data-toggle="tooltip"]').tooltip();
+            });
+        </script>
 
     </body>
 
