@@ -15,7 +15,7 @@
     <body>
         <br>
         <div class="container" style="max-width: 1500px;">
-        <!--    search input  -->
+            <!--    search input  -->
             <div class="row">
                 <div class="col-md-3">
                     <h2>Pretzel Al Lab</h2>
@@ -23,10 +23,24 @@
                 <div class="col-md-9">
                     <form action="/" method="post">
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Search" id="search" name="search" required>
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-primary">Submit</button>
+                            <div class="col-md-8" style="padding: 0;">
+                                <input type="text" class="form-control" placeholder="Search" id="search" name="search" required>
                             </div>
+                            <div class="col-md-2 m-0" style="padding: 0;">
+                                <select class="form-control" id="search_type" name = "search_type">                                    
+                                    <option>Table of X</option>
+                                    <option>List of X</option>
+                                    <option>X table</option>
+                                    <option>X list</option>
+                                    <option>X</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 m-0" style="padding: 0;">
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </div>                           
+                            
                         </div>
                     </form>
                 </div>
@@ -34,40 +48,47 @@
             </div>
             <!--    search content  -->
             <div class="row" style="margin-top: 70px">
-                 <!-- side tabs -->
+                <!-- side tabs -->
                 <div class="search-list-sidebar col-lg-3">
-                   <div id="sidebar-wrapper">
-                       <div class="search-list"><h5 >URLs </h5></div>
-                      <div class="list-group list-group-flush" >
-                           {% for index in range(0,searchlist | length) %}
-                               <div class="search-list-content col-md-12">
-                                    <a href="/search?val={{ searchlist[index] }}" class="list-group-item list-group-item-action bg-light" title="{{ searchlist[index] }} " style="color:blue" >
-                                       {{index}} . {{ strip_searchlist[index] }}
-                                    </a>
-                               </div>
-                           {% endfor %}
-                      </div>
+                    <div id="sidebar-wrapper">
+                        <div class="search-list">
+                            <h5>URLs </h5>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            {% for index in range(0,searchlist | length) %}
+                            <div class="search-list-content col-md-12">
+                                <a href="/search?val={{ searchlist[index] }}"
+                                    class="list-group-item list-group-item-action bg-light" title="{{ searchlist[index] }} "
+                                    style="color:blue">
+                                    {{index}} . {{ strip_searchlist[index] }}
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
                 <!-- table bar -->
-                 <div class="table-list-sidebar col-lg-1 ">
-                   <div id="sidebar-wrapper">
-                      <div class="table-list"><h5 >Tables</h5></div>
-                      <div class="list-group list-group-flush">
-                        {% for index in range(0,tb_count | length) %}
+                <div class="table-list-sidebar col-lg-1 ">
+                    <div id="sidebar-wrapper">
+                        <div class="table-list">
+                            <h5>Tables</h5>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            {% for index in range(0,tb_count | length) %}
                             <div class="search-list-content col-md-12">
-                                <a href="/table?val={{ index }}" class="list-group-item list-group-item-action bg-light" style="color:blue">
+                                <a href="/table?val={{ index }}" class="list-group-item list-group-item-action bg-light"
+                                    style="color:blue">
                                     {{ index }}
                                 </a>
                             </div>
-                        {% endfor %}
+                            {% endfor %}
 
-                      </div>
+                        </div>
                     </div>
                 </div>
                 <!-- Nav tabs -->
                 <div class="col-lg-8">
-                     <ul class="nav nav-tabs" role="tablist">
+                    <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item col-sm-4 p-0" style="width:50%">
                             <a class="nav-link active" data-toggle="tab" href="#command"><b>Tables</b></a>
                         </li>
@@ -84,8 +105,8 @@
                         <div id="command" class="container tab-pane active"><br>
                             <h5>{{string}}</h5>
                             <!-- <div class="m-10" style="margin:50px">
-                                {{distint_num}}{{ count }}
-                            </div> -->
+                                    {{distint_num}}{{ count }}
+                                </div> -->
                             <div class="m-10" style="margin:50px">
                                 {{ table|safe }}
                             </div>
@@ -93,12 +114,12 @@
                         <!-- Log tab -->
                         <div id="log" class="container tab-pane fade"><br>
                             <!-- <div class="m-6" style="margin:10px;">
-                                <h5><span style="color:blue">{{command_title}}</span>{{command}}</h5>
-                                <h5><span style="color:blue">{{url_title}}</span>{{url}}</h5>
-                            </div>  -->
+                                    <h5><span style="color:blue">{{command_title}}</span>{{command}}</h5>
+                                    <h5><span style="color:blue">{{url_title}}</span>{{url}}</h5>
+                                </div>  -->
                             <!--<div class="m-10" style="margin:50px">
-                                {{distint_num}}{{ count }}
-                            </div> -->
+                                    {{distint_num}}{{ count }}
+                                </div> -->
                             <div class="m-6" style="margin:10px;">
                                 {% for table in tables %}
                                 <div class="m-10" style="margin:50px">
@@ -109,10 +130,10 @@
                         </div>
                         <!-- State tab -->
                         <div id="state" class="container tab-pane fade"><br>
-                            <div class="m-6" style="margin:10px;">                               
+                            <div class="m-6" style="margin:10px;">
                                 <div class="m-10" style="margin:50px">
                                     {{ state_tables|safe }}
-                                </div>                               
+                                </div>
                             </div>
                         </div>
 
@@ -122,9 +143,9 @@
         </div>
         <!--  display tooltip of sidebar  -->
         <script>
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
-            });
+            $(document).ready(function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            });            
         </script>
 
     </body>
