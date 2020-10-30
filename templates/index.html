@@ -10,6 +10,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        
     </head>
 
     <body>
@@ -37,7 +38,7 @@
                             </div>
                             <div class="col-md-2 m-0" style="padding: 0;">
                                 <div class="input-group-append">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" onclick ="init_session()" class="btn btn-primary">Submit</button>
                                 </div>
                             </div>                           
                             
@@ -58,9 +59,10 @@
                             {% for index in range(0,searchlist | length) %}
                             <div class="search-list-content col-md-12">
                                 <a href="/search?val={{ searchlist[index] }}"
-                                    class="list-group-item list-group-item-action bg-light" title="{{ searchlist[index] }} "
-                                    style="color:blue">
-                                    {{index}} . {{ strip_searchlist[index] }}
+                                    data-id="main_category_{{index}}"
+                                    class="list-group-item list-group-item-action bg-light main_category"  title="{{ searchlist[index] }} "
+                                    style="color:blue; overflow-wrap: anywhere;">
+                                    {{index}} . {{ searchlist[index] }}
                                 </a>
                             </div>
                             {% endfor %}
@@ -76,7 +78,7 @@
                         <div class="list-group list-group-flush">
                             {% for index in range(0,tb_count | length) %}
                             <div class="search-list-content col-md-12">
-                                <a href="/table?val={{ index }}" class="list-group-item list-group-item-action bg-light"
+                                <a href="/table?val={{ index }}" data-id="sub_category{{index}}" class="list-group-item list-group-item-action bg-light sub_category"
                                     style="color:blue">
                                     {{ index }}
                                 </a>
@@ -108,7 +110,11 @@
                                     {{distint_num}}{{ count }}
                                 </div> -->
                             <div class="m-10" style="margin:50px">
-                                {{ table|safe }}
+                                {% if(tb_count | length == 0)%}
+                                    <h3>No table</h3>
+                                {% else %}
+                                    {{ table|safe }}
+                                {% endif %}                                
                             </div>
                         </div>
                         <!-- Log tab -->
@@ -143,9 +149,38 @@
         </div>
         <!--  display tooltip of sidebar  -->
         <script>
+
             $(document).ready(function () {
                 $('[data-toggle="tooltip"]').tooltip();
-            });            
+                var main_id  = sessionStorage.getItem('Main_id');
+                var sub_id = sessionStorage.getItem('Sub_id');
+                console.log('main_id = '+main_id+'sub = '+sub_id);
+                if(main_id != null)
+                {
+                    $('[data-id="'+main_id+'"]').css("color",'#c913ea');
+                }
+                if(sub_id != null)
+                {
+                    $('[data-id="'+sub_id+'"]').css("color",'#c913ea');
+                }
+            });        
+            $(".main_category").click(function(){
+                sessionStorage.setItem('Main_id',$(this).attr('data-id'));
+                sessionStorage.setItem('Sub_id','sub_category_0');
+                $('.main_category').css('color','blue');
+                $(this).css('color','#c913ea');
+            });
+            $(".sub_category").click(function(){
+                sessionStorage.setItem('Sub_id',$(this).attr('data-id'));
+                $('.main_category').css('color','blue');
+                $(this).css('color','#c913ea');
+            });
+
+            function init_session(){
+                sessionStorage.setItem('Main_id','_category_0');
+                sessionStorage.setItem('Sub_id','sub_category_0');
+            }
+           
         </script>
 
     </body>
