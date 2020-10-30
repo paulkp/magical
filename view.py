@@ -29,7 +29,7 @@ data_frame_list = []
 def index():
     return render_template("index.html")
 
-#=========== search keyword =================
+#================== search keyword =====================
 @app.route("/",methods=['GET', 'POST'])
 def search_result(): 
     global  strip_search_list, search_list
@@ -41,11 +41,16 @@ def search_result():
     if request.method == "POST":
         try:
             url = request.form['search']
+            #url = url.split(" ")       
 
-            url = url.split(" ")         
+            search_type = request.form.get('search_type')
+            if(search_type.split(' ')[0] == 'X'):
+                search_keyword = url + search_type.replace('X', '')
+            else:
+                search_keyword = search_type.replace('X', '') + url
 
             try:
-                for j in search("table of "+url[-1], stop=10):
+                for j in search(search_keyword, stop=10):
                     search_list.append(j)
                     strp_str = str(j)[0:30] + "..." # url is longer
                     strip_search_list.append(strp_str)
@@ -62,10 +67,12 @@ def search_result():
 def url_response(): 
     global table_count
     table_count.clear()
-    table_count = []   
+    table_count = []
+     
     url_address = request.args.get('val')
+    
     table_count = url_scrapping(url_address)    # dispplay table count
-    state_tab(data_frame_list[0])  
+    #state_tab(data_frame_list[0])  
 
     if len(table_count) != 0:
         return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, strip_searchlist=strip_search_list, 
@@ -89,7 +96,7 @@ def table_response():
 #================ click side bar of table list =======================
 
 #================ scrapping by each url of sidebar ==================
-def url_scrapping(string): 
+def url_scrapping(string):   
     global  df_result_table, data_frame_list
 
     df_result_table.clear()
@@ -98,7 +105,10 @@ def url_scrapping(string):
     data_frame_list.clear()
     data_frame_list = []
 
-    r = requests.get(string) 
+    try:
+        r = requests.get(string)
+    except requests.exceptions.RequestException as e:  # This is the correct syntax
+        raise SystemExit(e)
    
     soup = BeautifulSoup(r.content, 'html.parser') 
    
@@ -107,23 +117,24 @@ def url_scrapping(string):
         rows = tb.find_all('tr')
         try:
             if (rows[0].find('th')):
-                columns = [v.text for v in rows[0].find_all('th')]
+                columns = [v.text for v in rows[0].find_all('th') if v.text != ""] # 10/28/2020
                 
             elif (rows[0].find('td')):
-                columns = [v.text for v in rows[0].find_all('td')]                
+                columns = [v.text for v in rows[0].find_all('td') if v.text != ""]  # 10/28/2020
+              
+            if len(columns) != 0: # 10/28/2020
+                df = pd.DataFrame(columns=columns)
+                
+                for i in range(1, len(rows)):
+                    tds = rows[i].find_all('td')
+                    values = []
+                    for k in range(0, len(tds)):
+                        value = tds[k].text.replace('\n', '').replace('\r', '')
+                        values.append(value)
 
-            df = pd.DataFrame(columns=columns)
-               
-            for i in range(1, len(rows)):
-                tds = rows[i].find_all('td')
-                values = []
-                for k in range(0, len(tds)):
-                    value = tds[k].text.replace('\n', '').replace('\r', '')
-                    values.append(value)
-
-                df = df.append(pd.Series(values, index=columns), ignore_index=True)
-            df_result_table.append(df.to_html(classes='data'))
-            data_frame_list.append(df)    
+                    df = df.append(pd.Series(values, index=columns), ignore_index=True)
+                df_result_table.append(df.to_html(classes='data'))
+                data_frame_list.append(df)    
 
         except:
             print("dont'find")  
@@ -159,13 +170,46 @@ def state_tab(data_frame):
                     num_df.append(data_frame[row][i])         
 
             number_list = []
+            low_list = []
+            high_list = []
             print(type_data(num_df[i]))
             for i in range(0,len(num_df)):
                 if(type_data(num_df[0]) == type_data(num_df[i])):
                     data = type_data(num_df[0])
+                    if(data == "match"):
+                        
+                        String = "p" + num_df[i] + "p"
+                        val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
+                        if(type_data(val[1]) == "int"):
+                            low_list.append(int(val[1]))
+                        elif (type_data(val[1]) == "float" or type_data(val[1]) == "floating_with_2_decimal_places"):
+                            low_list.append(float(val[1]))                        
+
+                        if(type_data(val[3]) == "int"):
+                            high_list.append(int(val[3]))
+                        elif (type_data(val[3]) == "float" or type_data(val[1]) == "floating_with_2_decimal_places"):
+                            high_list.append(float(val[3]))
+
+                        data = "[type: range]"
+
+                        data =  data + "[low_max : " +str(max(low_list))+"]"
+                        data =  data + "[low_min : " + str(min(low_list))+"]"
+                        data =  data + "[low_av : " + str(max(low_list)/len(low_list))+"]"
+                        
+                        data =  data + "[high_max : " +str(max(high_list))+"]"
+                        data =  data + "[high_min : " + str(min(high_list))+"]"
+                        data =  data + "[high_av : " + str(max(high_list)/len(high_list))+"]"
+                        
+                    else:
+                        data = "char"
+                        print()
+
+                    
+
                     if(data == "s_char"):
                         String = "p" + num_df[i] + "p"
                         val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
+                      
                         data = ""
                         prefix = val[0].replace("p","")
                         if(prefix == ""):
@@ -197,13 +241,12 @@ def state_tab(data_frame):
                         print("don't find data")
                 else:
                     data = "mix"
-                    #break
-                             
+                    #break                             
                     
             state_value.append(data)
-    df_state=df_state.append(pd.Series(state_value,index=header),ignore_index=True)
-    
+    df_state=df_state.append(pd.Series(state_value,index=header),ignore_index=True)    
     df_state_result = df_state.to_html(classes='data')
+
 #================= get type of string data ================================
 def type_data(string):
     try:
@@ -225,14 +268,24 @@ def type_data(string):
                 return data
             else:
                 String = "p" + string + "p"
+                
+                    
+
                 val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
-                print(val)
+                
                 if len(val) == 1:
                     data = "char"
                     return data
                 else:
-                    data = "s_char"
-                    return data   
+                    #======= detection range ==================
+                    s = re.sub(r"\s+","",String)
+                    match = re.match(r"([a-z]+)([0-9]+)(to|-)([0-9]+)([a-z]+)", s, re.I)
+                    if match:
+                        data = "match"
+                        return data                    
+                    else:
+                        data = "s_char"
+                        return data                    
 
 def is_date(string, fuzzy=False):
     """
@@ -249,4 +302,4 @@ def is_date(string, fuzzy=False):
         return False
 
 if __name__ == '__main__':   
-    app.run(debug=True)
+    app.run(debug=True,host = '0.0.0.0', port='3333')
