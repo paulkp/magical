@@ -14,10 +14,12 @@ from dateutil.parser import parse
 from itertools import groupby
 import re
 import string
+from IPython.core.display import HTML
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
+pd.set_option('display.max_colwidth', -1)
 strip_search_list = []
 search_list = []
 table_count = []
@@ -190,42 +192,37 @@ def state_tab(data_frame):
                         elif (type_data(val[3]) == "float" or type_data(val[1]) == "floating_with_2_decimal_places"):
                             high_list.append(float(val[3]))
 
-                        data = "[type: range]"
+                        data = "type: range"+"<br>"
 
-                        data =  data + "[low_max : " +str(max(low_list))+"]"
-                        data =  data + "[low_min : " + str(min(low_list))+"]"
-                        data =  data + "[low_av : " + str(max(low_list)/len(low_list))+"]"
+                        data =  data + "low_max : " +str(max(low_list))+"<br>"
+                        data =  data + "low_min : " + str(min(low_list))+"<br>"
+                        data =  data + "low_av : " + str(max(low_list)/len(low_list))+"<br>"
                         
-                        data =  data + "[high_max : " +str(max(high_list))+"]"
-                        data =  data + "[high_min : " + str(min(high_list))+"]"
-                        data =  data + "[high_av : " + str(max(high_list)/len(high_list))+"]"
-                        
-                    else:
-                        data = "char"
-                        print()
+                        data =  data + "high_max : " +str(max(high_list))+"<br>" 
+                        data =  data + "high_min : " + str(min(high_list))+"<br>" 
+                        data =  data + "high_av : " + str(max(high_list)/len(high_list))+"<br>"                                 
+                   
 
-                    
-
-                    if(data == "s_char"):
+                    elif(data == "s_char"):
                         String = "p" + num_df[i] + "p"
                         val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
                       
                         data = ""
                         prefix = val[0].replace("p","")
                         if(prefix == ""):
-                            data = "[prefix : empty]"
+                            data = "prefix : empty"+"<br>"
                         else:
-                            data = "[Prefix : "+prefix+"]"
+                            data = "Prefix : "+prefix+"<br>"
 
                         surfix = val[2].replace("p", "")
                         number = val[1]                                   
 
-                        data = data + "[type : " + type_data(number)+"]"
+                        data = data + "type : " + type_data(number)+"<br>"
 
                         if(surfix == ""):
-                            data = data + "[surfix : empty"+"]"
+                            data = data + "surfix : empty"+"<br>"
                         else:
-                            data = data +"[surfix : "+ surfix+"]"
+                            data = data +"surfix : "+ surfix+"<br>"
 
                         if(type_data(number) == "int"):
                             number_list.append(int(number))
@@ -233,9 +230,9 @@ def state_tab(data_frame):
                             number_list.append(float(number))
 
                         if i == (len(num_df)-1):
-                            data =  data + "[max : " +str(max(number_list))+"]"
-                            data =  data + "[min : " + str(min(number_list))+"]"
-                            data =  data + "[av : " + str(max(number_list)/len(number))+"]"
+                            data =  data + "max : " +str(max(number_list))+"<br>"
+                            data =  data + "min : " + str(min(number_list))+"<br>"
+                            data =  data + "av : " + str(max(number_list)/len(number))+"<br>"
                         
                     else:
                         print("don't find data")
@@ -244,8 +241,9 @@ def state_tab(data_frame):
                     #break                             
                     
             state_value.append(data)
+            
     df_state=df_state.append(pd.Series(state_value,index=header),ignore_index=True)    
-    df_state_result = df_state.to_html(classes='data')
+    df_state_result = df_state.to_html(escape=False)
 
 #================= get type of string data ================================
 def type_data(string):
@@ -267,8 +265,7 @@ def type_data(string):
                 data = "date"
                 return data
             else:
-                String = "p" + string + "p"
-                
+                String = "p" + string + "p"               
                     
 
                 val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
@@ -302,4 +299,4 @@ def is_date(string, fuzzy=False):
         return False
 
 if __name__ == '__main__':   
-    app.run(debug=True,host = '0.0.0.0', port='3333')
+    app.run(debug=True)
