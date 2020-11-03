@@ -76,7 +76,7 @@
                                                 data-id="main_category_{{index}}"
                                                 class="list-group-item list-group-item-action bg-light main_category"  title="{{ searchlist[index] }} "
                                                 style="color:blue; overflow-wrap: anywhere;">
-                                                {{index}} . {{ searchlist[index] }}
+                                                {{index+1}} . {{ searchlist[index] }}
                                             </a>
                                         </div>                                        
                                     </div>
@@ -108,7 +108,7 @@
                             <div class="search-list-content col-md-12">
                                 <a href="/table?val={{ index }}" data-id="sub_category{{index}}" class="list-group-item list-group-item-action bg-light sub_category"
                                     style="color:blue">
-                                    {{ index }}
+                                    {{ index+1 }}
                                 </a>
                             </div>
                             {% endfor %}
@@ -222,9 +222,7 @@
 
             function init_session(){
                 sessionStorage.setItem('Main_id','_category_0');
-                sessionStorage.setItem('Sub_id','sub_category_0');
-                
-                //sessionStorage.setItem('search_input',document.getElementById('search').value)
+                sessionStorage.setItem('Sub_id','sub_category_0');              
                 
             }
            
