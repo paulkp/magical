@@ -25,15 +25,17 @@
                     <form action="/" method="post">
                         <div class="input-group mb-3">
                             <div class="col-md-8" style="padding: 0;">
-                                <input type="text" class="form-control" placeholder="Search" id="search" name="search" required>
+                                <input type="text" class="form-control" placeholder="Search" id="search" name="search" value ="{{keyword}}" required>
                             </div>
                             <div class="col-md-2 m-0" style="padding: 0;">
-                                <select class="form-control" id="search_type" name = "search_type">                                    
-                                    <option>Table of X</option>
-                                    <option>List of X</option>
-                                    <option>X table</option>
-                                    <option>X list</option>
-                                    <option>X</option>
+                                <select class="form-control" id="search_type" name = "search_type"> 
+                                    {% for tvalue in tvalues %} 
+                                        {% if selected_tvalue == tvalue %}
+                                            <option value="{{ tvalue }}" selected='selected'>{{ tvalue }}</option>
+                                        {% else %}
+                                            <option value="{{ tvalue }}" >{{ tvalue }}</option>
+                                        {% endif %}
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="col-md-2 m-0" style="padding: 0;">
@@ -168,7 +170,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -177,10 +178,16 @@
         <script>
 
             $(document).ready(function () {
+
                 $('[data-toggle="tooltip"]').tooltip();
                 var main_id  = sessionStorage.getItem('Main_id');
                 var sub_id = sessionStorage.getItem('Sub_id');
                 var link_id = sessionStorage.getItem('Link_id');
+                //var search_id = sessionStorage.getItem('search_input')
+                // if(search_id != null)
+                // {
+                //     $('#search').val(search_id);
+                // }
                 console.log('main_id = '+main_id+'sub = '+sub_id);
                 if(main_id != null)
                 {
@@ -216,6 +223,9 @@
             function init_session(){
                 sessionStorage.setItem('Main_id','_category_0');
                 sessionStorage.setItem('Sub_id','sub_category_0');
+                
+                //sessionStorage.setItem('search_input',document.getElementById('search').value)
+                
             }
            
         </script>
