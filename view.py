@@ -25,18 +25,28 @@ search_list = []
 table_count = []
 df_result_table = []
 df_state_result = ""
+url = ""
 data_frame_list = []
 
 @app.route('/')
 def index():
-    return render_template("index.html")
-
+    templateData = template()
+    return render_template("index.html", **templateData)
+def template():
+    templateDate = {
+        'tvalues' : getTValues(),
+        'selected_tvalue' : -1
+    }
+    return templateDate
+def getTValues():
+    return ('Table of X', 'List of X', 'X table', 'X list', 'X')
 #================== search keyword =====================
 @app.route("/",methods=['GET', 'POST'])
 def search_result(): 
-    global  strip_search_list, search_list
+    global  strip_search_list, search_list, url, templateData
     search_list.clear()
     search_list = []
+    templateData = {}
 
     strip_search_list.clear()
     strip_search_list = []
@@ -46,6 +56,10 @@ def search_result():
             #url = url.split(" ")       
 
             search_type = request.form.get('search_type')
+            templateData = template()
+            templateData['selected_tvalue'] = search_type
+            
+
             if(search_type.split(' ')[0] == 'X'):
                 search_keyword = url + search_type.replace('X', '')
             else:
@@ -57,7 +71,7 @@ def search_result():
                     strp_str = str(j)[0:30] + "..." # url is longer
                     strip_search_list.append(strp_str)
                 table_count = url_scrapping(search_list[0])    # dispplay table count
-                return render_template('index.html', searchlist=search_list, strip_searchlist=strip_search_list,)
+                return render_template('index.html', searchlist=search_list, strip_searchlist=strip_search_list, keyword = url, **templateData)
             except:
                 print("don't find data")  
 
@@ -78,10 +92,10 @@ def url_response():
 
     if len(table_count) != 0:
         return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, strip_searchlist=strip_search_list, 
-        tb_count = df_result_table , state_tables=df_state_result)
+        tb_count = df_result_table , state_tables=df_state_result, keyword = url, **templateData)
     else:
         return render_template('index.html',searchlist=search_list, strip_searchlist=strip_search_list, 
-        tb_count = df_result_table , state_tables=df_state_result )
+        tb_count = df_result_table , state_tables=df_state_result, keyword = url , **templateData)
 
 
 #================ click side bar of table list =======================
@@ -93,7 +107,7 @@ def table_response():
     state_tab(data_frame_list[table_num])   
 
     return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, strip_searchlist=strip_search_list, 
-    tb_count = df_result_table, state_tables=df_state_result)
+    tb_count = df_result_table, state_tables=df_state_result,keyword = url, **templateData)
 
 #================ click side bar of table list =======================
 
