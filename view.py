@@ -56,8 +56,8 @@ def search_result():
                     search_list.append(j)
                     strp_str = str(j)[0:30] + "..." # url is longer
                     strip_search_list.append(strp_str)
-                # table_count = url_scrapping(search_list[0])    # dispplay table count
-                return render_template('index.html', searchlist=search_list, strip_searchlist=strip_search_list)
+                table_count = url_scrapping(search_list[0])    # dispplay table count
+                return render_template('index.html', searchlist=search_list, strip_searchlist=strip_search_list,)
             except:
                 print("don't find data")  
 
@@ -146,17 +146,20 @@ def url_scrapping(string):
 def state_tab(data_frame):
     global df_state_result   
     
-    header = []
-
+    header = ['Type:head']
     for row in data_frame.columns:
         header.append(row)
     try:
         df_state = pd.DataFrame(columns=header)
+        pro_df = pd.DataFrame(columns=header)
+        pro_df1 = pd.DataFrame(columns=header)
     except AttributeError:
         df_state = pd.DataFrame(columns=[header])
-    state_value = []
+        pro_df = pd.DataFrame(columns=[header])
+        pro_df1 = pd.DataFrame(columns=[header])
+    state_value = [" "]
+    
     for row in data_frame.columns:
-
         if data_frame[row].empty == True:
                 data = "empty"
                 state_value.append(data)                
@@ -174,7 +177,6 @@ def state_tab(data_frame):
             number_list = []
             low_list = []
             high_list = []
-            print(type_data(num_df[i]))
             for i in range(0,len(num_df)):
                 if(type_data(num_df[0]) == type_data(num_df[i])):
                     data = type_data(num_df[0])
@@ -242,7 +244,63 @@ def state_tab(data_frame):
                     
             state_value.append(data)
             
-    df_state=df_state.append(pd.Series(state_value,index=header),ignore_index=True)    
+    df_state=df_state.append(pd.Series(state_value,index=header),ignore_index=True) 
+    #####################################
+    # print("*****************")
+    # if (state_value[4].startswith("type: range")):
+    #     print("ooooooooooooooookkkkkkkkkkkkkkkkkkkk")
+
+    # print(state_value[4])
+    # print("*****************")
+    cols = list(data_frame)
+    # cols.insert(0," ")
+    print(cols)
+    print(state_value)
+    state_value.pop(0)
+    print(state_value)
+    for k in range(0, len(data_frame.index)):
+        pro_value = [" "]
+        
+        for i in range(0,len(cols)):
+            #pro_value.append(data_frame[cols[i]][k])
+            if (state_value[i].startswith("type: range")):
+                print(data_frame[cols[i]][k])
+                #pro_value.append(data_frame[cols[i]][k])
+                rep = data_frame[cols[i]][k].replace('-', " to ")
+                res = [int(j) for j in rep.split() if j.isdigit()]
+                
+                range_val = str(res[0]) + "-" + str(res[1])
+                print(range_val)
+                pro_value.append(range_val)
+            elif(state_value[i].startswith("prefix")):
+                #pro_value.append(data_frame[cols[i]][k])
+                
+                p_text ="p" + data_frame[cols[i]][k] + "P"
+                
+                val = re.findall("\d+\.\d+|\d+|\d*\D+", p_text)
+                try:                    
+                    temp_val = val[1]
+                except:
+                    pass
+                pro_value.append(temp_val)
+                
+            else:           
+                pro_value.append(data_frame[cols[i]][k])                           
+        
+        pro_df = pro_df.append(pd.Series(pro_value, index=header), ignore_index=True) 
+    
+    df_state = df_state.append(pro_df) #2020/11/2
+    #####################################  
+    
+    pro_value1 = ["Type:Total"]
+    pro_value1.append("Total")
+    for i in range(1,len(cols)):
+        pro_value1.append(" ")           
+        
+    pro_df1 = pro_df1.append(pd.Series(pro_value1, index=header), ignore_index=True)
+   
+    df_state = df_state.append(pro_df1) ##2020/11/2
+  
     df_state_result = df_state.to_html(escape=False)
 
 #================= get type of string data ================================
