@@ -27,29 +27,29 @@ df_result_table = []
 df_state_result = ""
 url = ""
 data_frame_list = []
+templateData = {}
 
 @app.route('/')
 def index():
     templateData = template()
     return render_template("index.html", **templateData)
+#================= select option setting ===============
 def template():
     templateDate = {
         'tvalues' : getTValues(),
         'selected_tvalue' : -1
     }
     return templateDate
+#================= select option setting ===============
 def getTValues():
     return ('Table of X', 'List of X', 'X table', 'X list', 'X')
 #================== search keyword =====================
 @app.route("/",methods=['GET', 'POST'])
 def search_result(): 
-    global  strip_search_list, search_list, url, templateData
+    global  search_list, url, templateData
     search_list.clear()
     search_list = []
     templateData = {}
-
-    strip_search_list.clear()
-    strip_search_list = []
     if request.method == "POST":
         try:
             url = request.form['search']
@@ -71,7 +71,7 @@ def search_result():
                     strp_str = str(j)[0:30] + "..." # url is longer
                     strip_search_list.append(strp_str)
                 table_count = url_scrapping(search_list[0])    # dispplay table count
-                return render_template('index.html', searchlist=search_list, strip_searchlist=strip_search_list, keyword = url, **templateData)
+                return render_template('index.html', searchlist=search_list,  keyword = url, **templateData)
             except:
                 print("don't find data")  
 
@@ -91,11 +91,9 @@ def url_response():
     #state_tab(data_frame_list[0])  
 
     if len(table_count) != 0:
-        return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, strip_searchlist=strip_search_list, 
-        tb_count = df_result_table , state_tables=df_state_result, keyword = url, **templateData)
+        return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url, **templateData)
     else:
-        return render_template('index.html',searchlist=search_list, strip_searchlist=strip_search_list, 
-        tb_count = df_result_table , state_tables=df_state_result, keyword = url , **templateData)
+        return render_template('index.html',searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url , **templateData)
 
 
 #================ click side bar of table list =======================
@@ -106,8 +104,7 @@ def table_response():
 
     state_tab(data_frame_list[table_num])   
 
-    return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, strip_searchlist=strip_search_list, 
-    tb_count = df_result_table, state_tables=df_state_result,keyword = url, **templateData)
+    return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, tb_count = df_result_table, state_tables=df_state_result,keyword = url, **templateData)
 
 #================ click side bar of table list =======================
 
@@ -129,14 +126,18 @@ def url_scrapping(string):
     soup = BeautifulSoup(r.content, 'html.parser') 
    
     tb_list = soup.find_all('table')
+    # print("***********************")
+    # print(tb_list[8])
+    # print("**********************")
     for tb in tb_list:
         rows = tb.find_all('tr')
+        
         try:
             if (rows[0].find('th')):
-                columns = [v.text for v in rows[0].find_all('th') if v.text != ""] # 10/28/2020
+                columns = [v.text.replace('\n', '<br>').replace('\r', '') for v in rows[0].find_all('th') if v.text != ""] # 10/28/2020
                 
             elif (rows[0].find('td')):
-                columns = [v.text for v in rows[0].find_all('td') if v.text != ""]  # 10/28/2020
+                columns = [v.text.replace('\n', '<br>').replace('\r', '') for v in rows[0].find_all('td') if v.text != ""]  # 10/28/2020
               
             if len(columns) != 0: # 10/28/2020
                 df = pd.DataFrame(columns=columns)
@@ -145,11 +146,11 @@ def url_scrapping(string):
                     tds = rows[i].find_all('td')
                     values = []
                     for k in range(0, len(tds)):
-                        value = tds[k].text.replace('\n', '').replace('\r', '')
-                        values.append(value)
+                        value = tds[k].text.replace('\n', '<br>').replace('\r', '')
+                        values.append(value)                       
 
                     df = df.append(pd.Series(values, index=columns), ignore_index=True)
-                df_result_table.append(df.to_html(classes='data'))
+                df_result_table.append(df.to_html(escape=False))
                 data_frame_list.append(df)    
 
         except:
@@ -252,6 +253,7 @@ def state_tab(data_frame):
                         
                     else:
                         print("don't find data")
+                    data = data + ""
                 else:
                     data = "mix"
                     #break                             
@@ -260,18 +262,9 @@ def state_tab(data_frame):
             
     df_state=df_state.append(pd.Series(state_value,index=header),ignore_index=True) 
     #####################################
-    # print("*****************")
-    # if (state_value[4].startswith("type: range")):
-    #     print("ooooooooooooooookkkkkkkkkkkkkkkkkkkk")
-
-    # print(state_value[4])
-    # print("*****************")
+   
     cols = list(data_frame)
-    # cols.insert(0," ")
-    print(cols)
-    print(state_value)
     state_value.pop(0)
-    print(state_value)
     for k in range(0, len(data_frame.index)):
         pro_value = [" "]
         
@@ -283,9 +276,11 @@ def state_tab(data_frame):
                 rep = data_frame[cols[i]][k].replace('-', " to ")
                 res = [int(j) for j in rep.split() if j.isdigit()]
                 
-                range_val = str(res[0]) + "-" + str(res[1])
+                #range_val = str(res[0]) + "-" + str(res[1])
+                range_val = "<table style ='width:100%;'><tr ><td style = 'width:50%;border-right: 1px solid #808080;'>"+str(res[0])+"</td><td>"+str(res[1])+"</td></tr></table>"
                 print(range_val)
                 pro_value.append(range_val)
+                #pro_value.append(range_val)
             elif(state_value[i].startswith("prefix")):
                 #pro_value.append(data_frame[cols[i]][k])
                 
@@ -337,8 +332,7 @@ def type_data(string):
                 data = "date"
                 return data
             else:
-                String = "p" + string + "p"               
-                    
+                String = "p" + string + "p"                   
 
                 val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
                 
@@ -371,4 +365,4 @@ def is_date(string, fuzzy=False):
         return False
 
 if __name__ == '__main__':   
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0', port='5000')
