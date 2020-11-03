@@ -52,21 +52,47 @@
                 <!-- side tabs -->
                 <div class="search-list-sidebar col-lg-3">
                     <div id="sidebar-wrapper">
-                        <div class="search-list">
-                            <h5>URLs </h5>
-                        </div>
-                        <div class="list-group list-group-flush">
+                        <table>
+                            <tr>
+                                <th style="width: 100%;">
+                                    <div class="search-list">
+                                        <h5>Urls </h5>
+                                    </div>
+                                </th>
+                                <th style="width: 30%;">
+                                    <div class="search-list">
+                                        <h5>Select </h5>
+                                    </div>
+                                </th>
+                            </tr>
                             {% for index in range(0,searchlist | length) %}
-                            <div class="search-list-content col-md-12">
-                                <a href="/search?val={{ searchlist[index] }}"
-                                    data-id="main_category_{{index}}"
-                                    class="list-group-item list-group-item-action bg-light main_category"  title="{{ searchlist[index] }} "
-                                    style="color:blue; overflow-wrap: anywhere;">
-                                    {{index}} . {{ searchlist[index] }}
-                                </a>
-                            </div>
-                            {% endfor %}
-                        </div>
+                            <tr>
+                                <td>
+                                    <div class="list-group list-group-flush">                                
+                                        <div class="search-list-content col-md-12">
+                                            <a href="{{ searchlist[index] }}" target="_blank"
+                                                data-id="main_category_{{index}}"
+                                                class="list-group-item list-group-item-action bg-light main_category"  title="{{ searchlist[index] }} "
+                                                style="color:blue; overflow-wrap: anywhere;">
+                                                {{index}} . {{ searchlist[index] }}
+                                            </a>
+                                        </div>                                        
+                                    </div>
+                                </td>
+                                <td class="list-group-item bg-light " style="display: revert;">
+                                    <div class="list-group list-group-flush">
+                                        <div class="search-list-content col-md-12">
+                                            <a href="/search?val={{ searchlist[index] }}" data-id="link_category_{{index}}"  class="list-group-item-action link_category"
+                                                style="color:blue; ">
+                                                List
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>                            
+                            {% endfor %}                            
+                        </table>
+                        
                     </div>
                 </div>
                 <!-- table bar -->
@@ -91,14 +117,14 @@
                 <!-- Nav tabs -->
                 <div class="col-lg-8">
                     <ul class="nav nav-tabs" role="tablist">
-                        <li class="nav-item col-sm-4 p-0" style="width:50%">
-                            <a class="nav-link active" data-toggle="tab" href="#command"><b>Tables</b></a>
+                        <li class="nav-item col-sm-6 p-0" style="width:50%">
+                            <a class="nav-link active" data-toggle="tab" href="#command"><b>Raw</b></a>
                         </li>
-                        <li class="nav-item col-sm-4 p-0" style="width:50%">
+                        <!-- <li class="nav-item col-sm-4 p-0" style="width:50%">
                             <a class="nav-link" data-toggle="tab" href="#log"><b>Log</b></a>
-                        </li>
-                        <li class="nav-item col-sm-4 p-0" style="width:50%">
-                            <a class="nav-link" data-toggle="tab" href="#state"><b>Stats</b></a>
+                        </li> -->
+                        <li class="nav-item col-sm-6 p-0" style="width:50%">
+                            <a class="nav-link" data-toggle="tab" href="#state"><b>Processed</b></a>
                         </li>
                     </ul>
                     <!-- Tab panes -->
@@ -154,6 +180,7 @@
                 $('[data-toggle="tooltip"]').tooltip();
                 var main_id  = sessionStorage.getItem('Main_id');
                 var sub_id = sessionStorage.getItem('Sub_id');
+                var link_id = sessionStorage.getItem('Link_id');
                 console.log('main_id = '+main_id+'sub = '+sub_id);
                 if(main_id != null)
                 {
@@ -163,6 +190,11 @@
                 {
                     $('[data-id="'+sub_id+'"]').css("color",'#c913ea');
                 }
+                if(link_id != null)
+                {
+                    $('[data-id="'+link_id+'"').css("color","#c913ea");
+                }
+
             });        
             $(".main_category").click(function(){
                 sessionStorage.setItem('Main_id',$(this).attr('data-id'));
@@ -173,6 +205,11 @@
             $(".sub_category").click(function(){
                 sessionStorage.setItem('Sub_id',$(this).attr('data-id'));
                 $('.main_category').css('color','blue');
+                $(this).css('color','#c913ea');
+            });
+            $(".link_category").click(function(){
+                sessionStorage.setItem('Link_id',$(this).attr('data-id'));
+                $('.link_category').css('color','blue');
                 $(this).css('color','#c913ea');
             });
 
