@@ -46,6 +46,7 @@
   
   table,th, tr{
     text-align: left !important;
+    padding: 0;
   }
   
   div.search-list{
