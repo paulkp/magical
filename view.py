@@ -15,11 +15,13 @@ from itertools import groupby
 import re
 import string
 from IPython.core.display import HTML
+import math
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 pd.set_option('display.max_colwidth', -1)
+
 strip_search_list = []
 search_list = []
 table_count = []
@@ -52,13 +54,11 @@ def search_result():
     templateData = {}
     if request.method == "POST":
         try:
-            url = request.form['search']
-            #url = url.split(" ")       
+            url = request.form['search']            
 
             search_type = request.form.get('search_type')
             templateData = template()
-            templateData['selected_tvalue'] = search_type
-            
+            templateData['selected_tvalue'] = search_type            
 
             if(search_type.split(' ')[0] == 'X'):
                 search_keyword = url + search_type.replace('X', '')
@@ -68,12 +68,11 @@ def search_result():
             try:
                 for j in search(search_keyword, stop=10):
                     search_list.append(j)
-                    strp_str = str(j)[0:30] + "..." # url is longer
-                    strip_search_list.append(strp_str)
+                                        
                 table_count = url_scrapping(search_list[0])    # dispplay table count
                 return render_template('index.html', searchlist=search_list,  keyword = url, **templateData)
             except:
-                print("don't find data")  
+                print("don't find data") 
 
         except:
             return("Unable to get URL. Please make sure it's valid and try again.")
@@ -146,7 +145,7 @@ def url_scrapping(string):
                     tds = rows[i].find_all('td')
                     values = []
                     for k in range(0, len(tds)):
-                        value = tds[k].text.replace('\n', '<br>').replace('\r', '')
+                        value = tds[k].text.replace('\n', '').replace('\r', '')
                         values.append(value)                       
 
                     df = df.append(pd.Series(values, index=columns), ignore_index=True)
@@ -173,7 +172,8 @@ def state_tab(data_frame):
         pro_df = pd.DataFrame(columns=[header])
         pro_df1 = pd.DataFrame(columns=[header])
     state_value = [" "]
-    
+   
+
     for row in data_frame.columns:
         if data_frame[row].empty == True:
                 data = "empty"
@@ -192,34 +192,73 @@ def state_tab(data_frame):
             number_list = []
             low_list = []
             high_list = []
+            is_match = False
             for i in range(0,len(num_df)):
-                if(type_data(num_df[0]) == type_data(num_df[i])):
+                print(type_data(num_df[i].replace("m","FF")))
+                if type_data(num_df[i].replace("m","FF")) == "match":
+                    is_match = True
+            print(num_df[i])
+            print(is_match)               
+            for i in range(0,len(num_df)):           
+
+                if(type_data(num_df[0]) == type_data(num_df[i]) or is_match == True):
                     data = type_data(num_df[0])
-                    if(data == "match"):
-                        
-                        String = "p" + num_df[i] + "p"
+                    if(data == "match" or is_match == True):                        
+                        String = "@p" + num_df[i] + "@p"
                         val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
                         if(type_data(val[1]) == "int"):
                             low_list.append(int(val[1]))
                         elif (type_data(val[1]) == "float" or type_data(val[1]) == "floating_with_2_decimal_places"):
                             low_list.append(float(val[1]))                        
 
-                        if(type_data(val[3]) == "int"):
-                            high_list.append(int(val[3]))
-                        elif (type_data(val[3]) == "float" or type_data(val[1]) == "floating_with_2_decimal_places"):
-                            high_list.append(float(val[3]))
+                        if(type_data(val[-2]) == "int"):
+                            high_list.append(int(val[-2]))
+                        elif (type_data(val[-2]) == "float" or type_data(val[1]) == "floating_with_2_decimal_places"):
+                            high_list.append(float(val[-2]))
+
+                        #=============== standard deviations ===========================
+                        low_stdev = calc_stdev(low_list, sum(low_list)/len(low_list) )
+                        high_stdev = calc_stdev(high_list, sum(high_list)/len(high_list))
+                        #===============================================================
 
                         data = "type: range"+"<br>"
+                        data = data + "Prefix: "+ val[0].replace('@p','') + "<br>"
+                        data = data + "Surfix: "+ val[-1].replace('@p','') + "<br>"
 
                         data =  data + "low_max : " +str(max(low_list))+"<br>"
                         data =  data + "low_min : " + str(min(low_list))+"<br>"
-                        data =  data + "low_av : " + str(max(low_list)/len(low_list))+"<br>"
+                        data =  data + "low_av : " + str(significant_detect(sum(low_list)/len(low_list)))+"<br>"
+                        data =  data + "low_stdev : " + str(significant_detect(low_stdev))+"<br>" 
                         
                         data =  data + "high_max : " +str(max(high_list))+"<br>" 
                         data =  data + "high_min : " + str(min(high_list))+"<br>" 
-                        data =  data + "high_av : " + str(max(high_list)/len(high_list))+"<br>"                                 
+                        data =  data + "high_av : " + str(significant_detect(sum(high_list)/len(high_list)))+"<br>"
+                        data =  data + "high_stdev : " + str(significant_detect(high_stdev))+"<br>"                                                      
                    
+                    #=================== if there are duplicates in a List ===============================
+                    elif(data == "char"):
+                        dupl_check_list = []
+                        for item in num_df:
+                            if item[-1] == " ":
+                                dupl_check_list.append(item.replace(" ",""))
+                            else:
+                                dupl_check_list.append(item)
 
+                        dupl_result = checkIfDuplicates_1(dupl_check_list)
+                        if(dupl_result):
+                            data = "Type: categorical" + "<br>"
+                            dupl_dict = {k:dupl_check_list.count(k) for k in dupl_check_list}
+                            
+                            keys = [] 
+                            values = [] 
+                            items = dupl_dict.items() 
+                            for item in items: 
+                                keys.append(item[0]), values.append(item[1])
+                            data = data + "category_count: " + str(len(values)) + "<br>"
+                            data = data + "category_list: " + str(keys) + "<br>"
+                            data = data + "category_freqs: " + str(values)
+                        else:
+                            data = "char"
                     elif(data == "s_char"):
                         String = "p" + num_df[i] + "p"
                         val = re.findall("\d+\.\d+|\d+|\d*\D+", String)
@@ -249,7 +288,7 @@ def state_tab(data_frame):
                         if i == (len(num_df)-1):
                             data =  data + "max : " +str(max(number_list))+"<br>"
                             data =  data + "min : " + str(min(number_list))+"<br>"
-                            data =  data + "av : " + str(max(number_list)/len(number))+"<br>"
+                            data =  data + "av : " + str(significant_detect(sum(number_list)/len(number)))+"<br>"
                         
                     else:
                         print("don't find data")
@@ -260,8 +299,7 @@ def state_tab(data_frame):
                     
             state_value.append(data)
             
-    df_state=df_state.append(pd.Series(state_value,index=header),ignore_index=True) 
-    #####################################
+    df_state=df_state.append(pd.Series(state_value,index=header),ignore_index=True)   
    
     cols = list(data_frame)
     state_value.pop(0)
@@ -272,12 +310,25 @@ def state_tab(data_frame):
             #pro_value.append(data_frame[cols[i]][k])
             if (state_value[i].startswith("type: range")):
                 print(data_frame[cols[i]][k])
+                
                 #pro_value.append(data_frame[cols[i]][k])
                 rep = data_frame[cols[i]][k].replace('-', " to ")
-                res = [int(j) for j in rep.split() if j.isdigit()]
+                val = re.findall("\d+\.\d+|\d+|\d*\D+", rep)
+                rep1 = ''
+                val.insert(-1," ")
+                for item in val:
+                    rep1 = rep1 + item
+                print(rep)
+                print("************")
+
+                res = [j for j in rep1.split() if type_data(j) == "int" or type_data(j) == "floating_with_2_decimal_places" or type_data(j) == "float"]
                 
                 #range_val = str(res[0]) + "-" + str(res[1])
-                range_val = "<table style ='width:100%;'><tr ><td style = 'width:50%;border-right: 1px solid #808080;'>"+str(res[0])+"</td><td>"+str(res[1])+"</td></tr></table>"
+                try:
+                    range_val = "<table style ='width:100%;'><tr ><td style = 'width:50%;border-right: 1px solid #808080;'>"+str(res[0])+"</td><td>"+str(res[1])+"</td></tr></table>"
+                except:                    
+                    range_val = "<table style ='width:100%;'><tr ><td style = 'width:50%;border-right: 1px solid #808080;'>"+str(res[0])+"</td><td>"+str(res[0])+"</td></tr></table>"
+
                 print(range_val)
                 pro_value.append(range_val)
                 #pro_value.append(range_val)
@@ -299,8 +350,8 @@ def state_tab(data_frame):
         pro_df = pro_df.append(pd.Series(pro_value, index=header), ignore_index=True) 
     
     df_state = df_state.append(pro_df) #2020/11/2
-    #####################################  
-    
+
+    #----------------------- footer part ------------------------------    
     pro_value1 = ["Type:Total"]
     pro_value1.append("Total")
     for i in range(1,len(cols)):
@@ -312,6 +363,33 @@ def state_tab(data_frame):
   
     df_state_result = df_state.to_html(escape=False)
 
+#============= detection duplicate value in a list =================
+def checkIfDuplicates_1(listOfElems):
+    ''' Check if given list contains any duplicates '''
+    if len(listOfElems) == len(set(listOfElems)):
+        return False
+    else:
+        return True
+#============== calculate standard deviations =======================
+def calc_stdev(data_list, data_av):
+    sum  = 0
+    for i in range(0,len(data_list)):
+        sum = sum + pow((data_list[i] - data_av),2)
+    st_dev = math.sqrt(sum/len(data_list))
+
+    return st_dev
+#================= significant_detect ================================
+def significant_detect(num):
+    if num > 1:
+        return float(format(num,'.2f'))
+    else:
+        try:
+            z_cnt = int(abs(math.log10(num)))+2
+        except:
+            return 0
+        temp = '.' + str(z_cnt) + 'f'
+        return float(format(num,temp))
+        
 #================= get type of string data ================================
 def type_data(string):
     try:
@@ -349,7 +427,7 @@ def type_data(string):
                     else:
                         data = "s_char"
                         return data                    
-
+#============ detection date ====================================
 def is_date(string, fuzzy=False):
     """
     Return whether the string can be interpreted as a date.
