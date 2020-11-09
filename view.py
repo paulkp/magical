@@ -30,6 +30,8 @@ df_state_result = ""
 url = ""
 data_frame_list = []
 templateData = {}
+ul_result_df = []
+table_num = 0
 
 @app.route('/')
 def index():
@@ -70,6 +72,7 @@ def search_result():
                     search_list.append(j)
                                         
                 table_count = url_scrapping(search_list[0])    # dispplay table count
+                list_scraping(search_list[0])
                 return render_template('index.html', searchlist=search_list,  keyword = url, **templateData)
             except:
                 print("don't find data") 
@@ -84,29 +87,73 @@ def url_response():
     table_count.clear()
     table_count = []
      
-    url_address = request.args.get('val')
-    
+    url_address = request.args.get('val')    
     table_count = url_scrapping(url_address)    # dispplay table count
+    list_scraping(url_address)
     #state_tab(data_frame_list[0])  
 
     if len(table_count) != 0:
-        return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url, **templateData)
+        return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url, **templateData, list_count = ul_result_df)
     else:
-        return render_template('index.html',searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url , **templateData)
+        return render_template('index.html',searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url , **templateData, list_count = ul_result_df)
 
 
 #================ click side bar of table list =======================
 @app.route("/table")
 def table_response(): 
-    
+    global table_num
+    table_num = 0
     table_num = int(request.args.get('val'))     
 
     state_tab(data_frame_list[table_num])   
 
-    return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, tb_count = df_result_table, state_tables=df_state_result,keyword = url, **templateData)
+    return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, tb_count = df_result_table, state_tables=df_state_result,keyword = url, **templateData, list_count = ul_result_df)
+
+@app.route("/list")
+def list_response(): 
+    
+    list_num = int(request.args.get('val')) 
+    
+    return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, tb_count = df_result_table, state_tables=ul_result_df[list_num],keyword = url, **templateData, list_count = ul_result_df)   
+
+    # #state_tab(data_frame_list[table_num])   
+
+    # return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, tb_count = df_result_table,keyword = url, **templateData, list_count = ul_result_df,state_tables=ul_result_df)
 
 #================ click side bar of table list =======================
 
+def list_scraping(string):
+    global ul_result_df
+    ul_result_df.clear()
+    ul_result_df = []
+    try:
+        r = requests.get(string)
+    except requests.exceptions.RequestException as e:  # This is the correct syntax
+        raise SystemExit(e)
+   
+    soup = BeautifulSoup(r.content, 'html.parser') 
+   
+    ul_list = soup.find_all('ul') 
+    columns = ['item','url']  
+    df = pd.DataFrame(columns=columns)
+    for tb in ul_list:
+        items = tb.find_all('li')
+        
+        for item in items:
+            value = []
+            value.append(item.text.replace('\n', '<br>').replace('\r', ''))            
+            try:
+                item_url = item.find('a')['href']
+                
+            except:
+                item_url = ""
+            value.append(item_url)
+            
+            df = df.append(pd.Series(value, index=columns), ignore_index=True)
+            
+        ul_result_df.append(df.to_html(escape=False))
+    # print(ul_result_df)
+    
 #================ scrapping by each url of sidebar ==================
 def url_scrapping(string):   
     global  df_result_table, data_frame_list
