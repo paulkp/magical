@@ -92,8 +92,8 @@ def url_response():
     list_scraping(url_address)
     #state_tab(data_frame_list[0])  
 
-    if len(table_count) != 0:
-        return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url, **templateData, list_count = ul_result_df)
+    if len(table_count) != 0:        
+        return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url, **templateData, list_count = ul_result_df)       
     else:
         return render_template('index.html',searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url , **templateData, list_count = ul_result_df)
 
@@ -111,14 +111,15 @@ def table_response():
 
 @app.route("/list")
 def list_response(): 
-    
+
+   
     list_num = int(request.args.get('val')) 
     
     return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, tb_count = df_result_table, state_tables=ul_result_df[list_num],keyword = url, **templateData, list_count = ul_result_df)   
 
-    # #state_tab(data_frame_list[table_num])   
+    #state_tab(data_frame_list[table_num])   
 
-    # return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, tb_count = df_result_table,keyword = url, **templateData, list_count = ul_result_df,state_tables=ul_result_df)
+    return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, tb_count = df_result_table,keyword = url, **templateData, list_count = ul_result_df,state_tables=ul_result_df)
 
 #================ click side bar of table list =======================
 
@@ -286,9 +287,12 @@ def state_tab(data_frame):
                     elif(data == "char"):
                         dupl_check_list = []
                         for item in num_df:
-                            if item[-1] == " ":
-                                dupl_check_list.append(item.replace(" ",""))
-                            else:
+                            try:
+                                if item[-1] == " ":
+                                    dupl_check_list.append(item.replace(" ",""))
+                                else:
+                                    dupl_check_list.append(item)
+                            except:
                                 dupl_check_list.append(item)
 
                         dupl_result = checkIfDuplicates_1(dupl_check_list)
