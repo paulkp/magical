@@ -19,7 +19,7 @@
             <!--    search input  -->
             <div class="row">
                 <div class="col-md-3" >
-                    <img src="../static/img/mark.png" alt="mark" width="80%">
+                    <h2>Pretzel Al Lab</h2>
                 </div>
                 <div class="col-md-9">
                     <form action="/" method="post">
@@ -116,23 +116,42 @@
                         </div>
                     </div>
                 </div>
+                <!-- table bar -->
+                <div class="table-list-sidebar col-lg-1 ">
+                    <div id="sidebar-wrapper">
+                        <div class="table-list">
+                            <h5>Lists</h5>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            {% for index in range(0,list_count | length) %}
+                            <div class="search-list-content col-md-12">
+                                <a href="/list?val={{ index }}" data-id="sub_ul_category{{index}}" class="list-group-item list-group-item-action bg-light sub_category"
+                                    style="color:blue">
+                                    {{ index+1 }}
+                                </a>
+                            </div>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                </div>
                 <!-- Nav tabs -->
-                <div class="col-lg-8">
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li class="nav-item col-sm-6 p-0" style="width:50%">
-                            <a class="nav-link active" data-toggle="tab" href="#command"><b>Raw</b></a>
-                        </li>
+                <div class="col-lg-7">
+                    <ul class="nav nav-tabs" role="tablist">                        
                         <!-- <li class="nav-item col-sm-4 p-0" style="width:50%">
                             <a class="nav-link" data-toggle="tab" href="#log"><b>Log</b></a>
                         </li> -->
                         <li class="nav-item col-sm-6 p-0" style="width:50%">
-                            <a class="nav-link" data-toggle="tab" href="#state"><b>Processed</b></a>
+                            <a class="nav-link active"  data-toggle="tab" href="#state"><b>Processed</b></a>
+                        </li>
+                        <li class="nav-item col-sm-6 p-0" style="width:50%">
+                            <a class="nav-link " data-toggle="tab" href="#command"><b>Raw</b></a>
                         </li>
                     </ul>
                     <!-- Tab panes -->
                     <div class="tab-content">
                         <!-- Command tab -->
-                        <div id="command" class="container tab-pane active"><br>
+                        <div id="command" class="container tab-pane fade"><br>
                             <h5>{{string}}</h5>
                             <!-- <div class="m-10" style="margin:50px">
                                     {{distint_num}}{{ count }}
@@ -145,28 +164,17 @@
                                 {% endif %}                                
                             </div>
                         </div>
-                        <!-- Log tab -->
-                        <div id="log" class="container tab-pane fade"><br>
-                            <!-- <div class="m-6" style="margin:10px;">
-                                    <h5><span style="color:blue">{{command_title}}</span>{{command}}</h5>
-                                    <h5><span style="color:blue">{{url_title}}</span>{{url}}</h5>
-                                </div>  -->
-                            <!--<div class="m-10" style="margin:50px">
-                                    {{distint_num}}{{ count }}
-                                </div> -->
-                            <div class="m-6" style="margin:10px;">
-                                {% for table in tables %}
-                                <div class="m-10" style="margin:50px">
-                                    {{ table|safe }}
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
+                        
                         <!-- State tab -->
-                        <div id="state" class="container tab-pane fade"><br>
+                        <div id="state" class="container tab-pane active"><br>
                             <div class="m-6" style="margin:10px;">
                                 <div class="m-10" style="margin:50px">
-                                    {{ state_tables|safe }}
+                                    {% if(tb_count | length == 0)%}
+                                    <h3>No table</h3>
+                                    {% else %}
+                                        {{ state_tables|safe }}
+                                    {% endif %} 
+                                    
                                 </div>
                             </div>
                         </div>
@@ -197,6 +205,10 @@
                 {
                     $('[data-id="'+sub_id+'"]').css("color",'#c913ea');
                 }
+                if(sub_ul_id != null)
+                {
+                    $('[data-id="'+sub_ul_id+'"]').css("color",'#c913ea');
+                }
                 if(link_id != null)
                 {
                     $('[data-id="'+link_id+'"').css("color","#c913ea");
@@ -214,6 +226,11 @@
                 $('.main_category').css('color','blue');
                 $(this).css('color','#c913ea');
             });
+            $(".sub_ul_category").click(function(){
+                sessionStorage.setItem('Sub_ul_id',$(this).attr('data-id'));
+                $('.main_category').css('color','blue');
+                $(this).css('color','#c913ea');
+            });
             $(".link_category").click(function(){
                 sessionStorage.setItem('Link_id',$(this).attr('data-id'));
                 $('.link_category').css('color','blue');
@@ -222,7 +239,8 @@
 
             function init_session(){
                 sessionStorage.setItem('Main_id','_category_0');
-                sessionStorage.setItem('Sub_id','sub_category_0');              
+                sessionStorage.setItem('Sub_id','sub_category_0');
+                sessionStorage.setItem('Sub_ul_id','sub_ul_category_0');       
                 
             }
            
