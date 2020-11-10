@@ -169,7 +169,7 @@
                         <div id="state" class="container tab-pane active"><br>
                             <div class="m-6" style="margin:10px;">
                                 <div class="m-10" style="margin:50px">
-                                    {% if(tb_count | length == 0)%}
+                                    {% if(state_tables | length == 0 )%}
                                     <h3>No table</h3>
                                     {% else %}
                                         {{ state_tables|safe }}
