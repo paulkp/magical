@@ -115,11 +115,15 @@ def list_response():
    
     list_num = int(request.args.get('val')) 
     
-    return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, tb_count = df_result_table, state_tables=ul_result_df[list_num],keyword = url, **templateData, list_count = ul_result_df)   
+    print(ul_result_df[list_num])
+    if len(table_count) != 0:        
+        return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, tb_count = df_result_table , state_tables=ul_result_df[list_num], keyword = url, **templateData, list_count = ul_result_df)       
+    else:
+        return render_template('index.html',searchlist=search_list, tb_count = df_result_table , state_tables=ul_result_df[list_num], keyword = url , **templateData, list_count = ul_result_df)
 
     #state_tab(data_frame_list[table_num])   
 
-    return render_template('index.html',tables=df_result_table,table=df_result_table[table_num],searchlist=search_list, tb_count = df_result_table,keyword = url, **templateData, list_count = ul_result_df,state_tables=ul_result_df)
+    
 
 #================ click side bar of table list =======================
 
@@ -142,7 +146,7 @@ def list_scraping(string):
         
         for item in items:
             value = []
-            value.append(item.text.replace('\n', '<br>').replace('\r', ''))            
+            value.append(item.text.replace('\n', '<br>').replace('\r', '').replace('\t', ' '))           
             try:
                 item_url = item.find('a')['href']
                 
