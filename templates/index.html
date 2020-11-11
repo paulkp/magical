@@ -10,40 +10,23 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        
     </head>
 
     <body>
         <br>
         <div class="container" style="max-width: 1500px;">
-            <!--    search input  -->
+        <!--    search input  -->
             <div class="row">
-                <div class="col-md-3" >
+                <div class="col-md-3">
                     <h2>Pretzel Al Lab</h2>
                 </div>
                 <div class="col-md-9">
                     <form action="/" method="post">
                         <div class="input-group mb-3">
-                            <div class="col-md-8" style="padding: 0;">
-                                <input type="text" class="form-control" placeholder="Search" id="search" name="search" value ="{{keyword}}" required>
+                            <input type="text" class="form-control" placeholder="Search" id="search" name="search" required>
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary">Submit</button>
                             </div>
-                            <div class="col-md-2 m-0" style="padding: 0;">
-                                <select class="form-control" id="search_type" name = "search_type"> 
-                                    {% for tvalue in tvalues %} 
-                                        {% if selected_tvalue == tvalue %}
-                                            <option value="{{ tvalue }}" selected='selected'>{{ tvalue }}</option>
-                                        {% else %}
-                                            <option value="{{ tvalue }}" >{{ tvalue }}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-2 m-0" style="padding: 0;">
-                                <div class="input-group-append">
-                                    <button type="submit" onclick ="init_session()" class="btn btn-primary">Submit</button>
-                                </div>
-                            </div>                           
-                            
                         </div>
                     </form>
                 </div>
@@ -51,199 +34,97 @@
             </div>
             <!--    search content  -->
             <div class="row" style="margin-top: 70px">
-                <!-- side tabs -->
+                 <!-- side tabs -->
                 <div class="search-list-sidebar col-lg-3">
-                    <div id="sidebar-wrapper">
-                        <table>
-                            <tr>
-                                <th style="width: 100%;">
-                                    <div class="search-list">
-                                        <h5>Urls </h5>
-                                    </div>
-                                </th>
-                                <th style="width: 30%;">
-                                    <div class="search-list">
-                                        <h5>Select </h5>
-                                    </div>
-                                </th>
-                            </tr>
-                            {% for index in range(0,searchlist | length) %}
-                            <tr>
-                                <td>
-                                    <div class="list-group list-group-flush">                                
-                                        <div class="search-list-content col-md-12">
-                                            <a href="{{ searchlist[index] }}" target="_blank"
-                                                data-id="main_category_{{index}}"
-                                                class="list-group-item list-group-item-action bg-light main_category"  title="{{ searchlist[index] }} "
-                                                style="color:blue; overflow-wrap: anywhere;">
-                                                {{index+1}} . {{ searchlist[index] }}
-                                            </a>
-                                        </div>                                        
-                                    </div>
-                                </td>
-                                <td class="list-group-item bg-light " style="display: revert;">
-                                    <div class="list-group list-group-flush">
-                                        <div class="search-list-content col-md-12">
-                                            <a href="/search?val={{ searchlist[index] }}" data-id="link_category_{{index}}"  class="list-group-item-action link_category"
-                                                style="color:blue; ">
-                                                List
-                                            </a>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>                            
-                            {% endfor %}                            
-                        </table>
-                        
+                   <div id="sidebar-wrapper">
+                       <div class="search-list"><h5 >URLs </h5></div>
+                      <div class="list-group list-group-flush" >
+                           {% for index in range(0,searchlist | length) %}
+                               <div class="search-list-content col-md-12">
+                                    <a href="/search?val={{ searchlist[index] }}" class="list-group-item list-group-item-action bg-light" title="{{ searchlist[index] }} " style="color:blue" >
+                                       {{index}} . {{ strip_searchlist[index] }}
+                                    </a>
+                               </div>
+                           {% endfor %}
+                      </div>
                     </div>
                 </div>
                 <!-- table bar -->
-                <div class="table-list-sidebar col-lg-1 ">
-                    <div id="sidebar-wrapper">
-                        <div class="table-list">
-                            <h5>Tables</h5>
-                        </div>
-                        <div class="list-group list-group-flush">
-                            {% for index in range(0,tb_count | length) %}
+                 <div class="table-list-sidebar col-lg-1 ">
+                   <div id="sidebar-wrapper">
+                      <div class="table-list"><h5 >Tables</h5></div>
+                      <div class="list-group list-group-flush">
+                        {% for index in range(0,tb_count | length) %}
                             <div class="search-list-content col-md-12">
-                                <a href="/table?val={{ index }}" data-id="sub_category{{index}}" class="list-group-item list-group-item-action bg-light sub_category"
-                                    style="color:blue">
-                                    {{ index+1 }}
+                                <a href="/table?val={{ index }}" class="list-group-item list-group-item-action bg-light" style="color:blue">
+                                    {{ index }}
                                 </a>
                             </div>
-                            {% endfor %}
+                        {% endfor %}
 
-                        </div>
-                    </div>
-                </div>
-                <!-- table bar -->
-                <div class="table-list-sidebar col-lg-1 ">
-                    <div id="sidebar-wrapper">
-                        <div class="table-list">
-                            <h5>Lists</h5>
-                        </div>
-                        <div class="list-group list-group-flush">
-                            {% for index in range(0,list_count | length) %}
-                            <div class="search-list-content col-md-12">
-                                <a href="/list?val={{ index }}" data-id="sub_ul_category{{index}}" class="list-group-item list-group-item-action bg-light sub_category"
-                                    style="color:blue">
-                                    {{ index+1 }}
-                                </a>
-                            </div>
-                            {% endfor %}
-
-                        </div>
+                      </div>
                     </div>
                 </div>
                 <!-- Nav tabs -->
-                <div class="col-lg-7">
-                    <ul class="nav nav-tabs" role="tablist">                        
-                        <!-- <li class="nav-item col-sm-4 p-0" style="width:50%">
-                            <a class="nav-link" data-toggle="tab" href="#log"><b>Log</b></a>
-                        </li> -->
-                        <li class="nav-item col-sm-6 p-0" style="width:50%">
-                            <a class="nav-link active"  data-toggle="tab" href="#state"><b>Processed</b></a>
+                <div class="col-lg-8">
+                     <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item col-sm-4 p-0" style="width:50%">
+                            <a class="nav-link active" data-toggle="tab" href="#command"><b>Tables</b></a>
                         </li>
-                        <li class="nav-item col-sm-6 p-0" style="width:50%">
-                            <a class="nav-link " data-toggle="tab" href="#command"><b>Raw</b></a>
+                        <li class="nav-item col-sm-4 p-0" style="width:50%">
+                            <a class="nav-link" data-toggle="tab" href="#log"><b>Log</b></a>
+                        </li>
+                        <li class="nav-item col-sm-4 p-0" style="width:50%">
+                            <a class="nav-link" data-toggle="tab" href="#state"><b>Stats</b></a>
                         </li>
                     </ul>
                     <!-- Tab panes -->
                     <div class="tab-content">
                         <!-- Command tab -->
-                        <div id="command" class="container tab-pane fade"><br>
+                        <div id="command" class="container tab-pane active"><br>
                             <h5>{{string}}</h5>
                             <!-- <div class="m-10" style="margin:50px">
-                                    {{distint_num}}{{ count }}
-                                </div> -->
+                                {{distint_num}}{{ count }}
+                            </div> -->
                             <div class="m-10" style="margin:50px">
-                                {% if(tb_count | length == 0)%}
-                                    <h3>No table</h3>
-                                {% else %}
-                                    {{ table|safe }}
-                                {% endif %}                                
+                                {{ table|safe }}
                             </div>
                         </div>
-                        
-                        <!-- State tab -->
-                        <div id="state" class="container tab-pane active"><br>
+                        <!-- Log tab -->
+                        <div id="log" class="container tab-pane fade"><br>
+                            <!-- <div class="m-6" style="margin:10px;">
+                                <h5><span style="color:blue">{{command_title}}</span>{{command}}</h5>
+                                <h5><span style="color:blue">{{url_title}}</span>{{url}}</h5>
+                            </div>  -->
+                            <!--<div class="m-10" style="margin:50px">
+                                {{distint_num}}{{ count }}
+                            </div> -->
                             <div class="m-6" style="margin:10px;">
+                                {% for table in tables %}
                                 <div class="m-10" style="margin:50px">
-                                    {% if(state_tables | length == 0 )%}
-                                    <h3>No table</h3>
-                                    {% else %}
-                                        {{ state_tables|safe }}
-                                    {% endif %} 
-                                    
+                                    {{ table|safe }}
                                 </div>
+                                {% endfor %}
                             </div>
                         </div>
+                        <!-- State tab -->
+                        <div id="state" class="container tab-pane fade"><br>
+                            <div class="m-6" style="margin:10px;">                               
+                                <div class="m-10" style="margin:50px">
+                                    {{ state_tables|safe }}
+                                </div>                               
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
         <!--  display tooltip of sidebar  -->
         <script>
-
-            $(document).ready(function () {
-
-                $('[data-toggle="tooltip"]').tooltip();
-                var main_id  = sessionStorage.getItem('Main_id');
-                var sub_id = sessionStorage.getItem('Sub_id');
-                var link_id = sessionStorage.getItem('Link_id');
-                //var search_id = sessionStorage.getItem('search_input')
-                // if(search_id != null)
-                // {
-                //     $('#search').val(search_id);
-                // }
-                //console.log('main_id = '+main_id+'sub = '+sub_id);
-                if(main_id != null)
-                {
-                    $('[data-id="'+main_id+'"]').css("color",'#c913ea');
-                }
-                if(sub_id != null)
-                {
-                    $('[data-id="'+sub_id+'"]').css("color",'#c913ea');
-                }
-                if(sub_ul_id != null)
-                {
-                    $('[data-id="'+sub_ul_id+'"]').css("color",'#c913ea');
-                }
-                if(link_id != null)
-                {
-                    $('[data-id="'+link_id+'"').css("color","#c913ea");
-                }
-
-            });        
-            $(".main_category").click(function(){
-                sessionStorage.setItem('Main_id',$(this).attr('data-id'));
-                sessionStorage.setItem('Sub_id','sub_category_0');
-                $('.main_category').css('color','blue');
-                $(this).css('color','#c913ea');
+            $(document).ready(function(){
+              $('[data-toggle="tooltip"]').tooltip();
             });
-            $(".sub_category").click(function(){
-                sessionStorage.setItem('Sub_id',$(this).attr('data-id'));
-                $('.main_category').css('color','blue');
-                $(this).css('color','#c913ea');
-            });
-            $(".sub_ul_category").click(function(){
-                sessionStorage.setItem('Sub_ul_id',$(this).attr('data-id'));
-                $('.main_category').css('color','blue');
-                $(this).css('color','#c913ea');
-            });
-            $(".link_category").click(function(){
-                sessionStorage.setItem('Link_id',$(this).attr('data-id'));
-                $('.link_category').css('color','blue');
-                $(this).css('color','#c913ea');
-            });
-
-            function init_session(){
-                sessionStorage.setItem('Main_id','_category_0');
-                sessionStorage.setItem('Sub_id','sub_category_0');
-
-                
-            }
-           
         </script>
 
     </body>
