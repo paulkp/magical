@@ -46,16 +46,45 @@
   
   table,th, tr{
     text-align: left !important;
+    padding: 0;
   }
   
   div.search-list{
       border: 1px solid white;
       border-bottom-color: #3A7734;
+      margin-bottom: 10px;
+      /* background-color: #0081ff; */
+      text-align: center;
+      padding: 10px;
+      /* color: #ffffff; */
   }
   div.table-list{
        border: 1px solid white;
       border-bottom-color: #3A7734;
+      margin-bottom: 10px;
+      /* background-color: #0081ff; */
+      text-align: center;
+      padding: 10px;
+      /* color: #ffffff; */
   }
-  .search-list-content{
-      margin: 5px 0px 0px 0px;
+  div.search-list-content{
+    padding:0px;
   }
+  .nav-tabs{
+    border-bottom: 1px solid #dee2e6;
+    /* background: #0081ff; */
+    padding: 10px 10px 0 10px;   
+  }
+  .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    /* color: #495057; */
+    background-color: #fff;
+    /* border-color: #dee2e6 #dee2e6 #fff; */
+    /* color:black; */
+}
+.nav-link {
+  display: block;
+  padding: .5rem 1rem;
+  /* color: #fff; */
+}
+
+  
