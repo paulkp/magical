@@ -72,9 +72,7 @@ def search_result():
                     search_list.append(j)
                                         
                 table_count = url_scrapping(search_list[0])    # dispplay table count
-                list_scraping(search_list[0])
-
-
+                #list_scraping(search_list[0])
 
                 response = make_response(render_template('index.html',searchlist=search_list,  keyword = url, **templateData ))
                 response.set_cookie("keyword", url)
@@ -101,21 +99,21 @@ def url_response():
     
     templateData = template()
     templateData['selected_tvalue'] = search_type
-
-
    
 
     url_address = request.args.get('val')    
     table_count = url_scrapping(url_address)    # dispplay table count
-    list_scraping(url_address)
+    ul_result_df1 = []
+    list_scraping(url_address)   
     
     #state_tab(data_frame_list[0])  
 
     if len(table_count) != 0:        
-        return render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url, **templateData, list_count = ul_result_df)       
+        response = make_response(render_template('index.html',tables=df_result_table,table=df_result_table[0],searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url, **templateData, list_count = ul_result_df))       
     else:
-        return render_template('index.html',searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url , **templateData, list_count = ul_result_df)
-
+        response = make_response(render_template('index.html',searchlist=search_list, tb_count = df_result_table , state_tables=df_state_result, keyword = url , **templateData, list_count = ul_result_df))
+    response.set_cookie('ul_result_df', json.dumps(ul_result_df1))
+    return response
 
 #================ click side bar of table list =======================
 @app.route("/table")
@@ -130,6 +128,9 @@ def table_response():
     templateData['selected_tvalue'] = search_type
 
     search_list = json.loads(request.cookies.get('search_list'))
+    # json.loads(request.cookies.get('ul_result_df'))
+    # print(ul_result_df1)
+    # print("=====================")
 
     state_tab(data_frame_list[table_num])   
 
@@ -159,6 +160,7 @@ def list_scraping(string):
     global ul_result_df
     ul_result_df.clear()
     ul_result_df = []
+    
     try:
         r = requests.get(string)
     except requests.exceptions.RequestException as e:  # This is the correct syntax
@@ -166,12 +168,15 @@ def list_scraping(string):
    
     soup = BeautifulSoup(r.content, 'html.parser') 
    
-    ul_list = soup.find_all('ul') 
+    ul_list = soup.find_all('ul')
+    print(ul_list)
+    print("--------------")
+    
     columns = ['item','url']  
-    df = pd.DataFrame(columns=columns)
+    
     for tb in ul_list:
         items = tb.find_all('li')
-        
+        df = pd.DataFrame(columns=columns)
         for item in items:
             value = []
             value.append(item.text.replace('\n', '<br>').replace('\r', '').replace('\t', ' '))           
@@ -183,9 +188,10 @@ def list_scraping(string):
             value.append(item_url)
             
             df = df.append(pd.Series(value, index=columns), ignore_index=True)
-            
+        
         ul_result_df.append(df.to_html(escape=False))
-    # print(ul_result_df)
+ 
+    return ul_result_df
     
 #================ scrapping by each url of sidebar ==================
 def url_scrapping(string):   
